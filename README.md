@@ -9,6 +9,7 @@ It's based on a text file who have all shortcuts saved as ``shortcut:"C:\path\"`
 ### Dev process
 
  - [ ] Start coding
+ - [ ] Learning C++
  - [ ] Make the project work
  - [ ] Write a good readme
  - [ ] Debug correctly
