@@ -1,0 +1,3 @@
+test:"C:\test\ayya\ouyouu\ouyouyouyouyou\test.git"
+test2:" franchement, mon salaire est correct   "
+eee reee

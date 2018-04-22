@@ -43,10 +43,16 @@ goto search
 	echo.
 	REM ----- Compilation -----
 	g++ src/*.cpp -o bin/%out% -Wall
+	set succ=%errorlevel%
 	REM -----    -----    -----
 	echo.
-	echo ------ Compilation terminee !
-	goto :exec
+	IF %succ% EQU 0 (
+		echo ------ Compilation terminee !
+		goto :exec
+	)
+	REM else
+	echo ------ Une erreur est survenue lors de la compilation...
+	goto :exit
 
 :exec
 	echo.
@@ -54,5 +60,13 @@ goto search
 	echo Appuyez sur une touche pour lancer l'executable...
 	pause >nul
 	echo Execution de %out%
-	start bin/%out%
+	cd bin/
+	start %out%
+	goto :eof
+	
+:exit
+	echo.
+	echo.
+	echo Appuyez sur une touche pour terminer...
+	pause >nul
 	goto :eof
