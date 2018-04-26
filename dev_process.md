@@ -1,8 +1,12 @@
 # Dev process
 
+ - [ ] Prochaine update: faire passer le projet sous un projet Visual Studio 2017
+
+
+ - [ ] Apprendre comment manipuler précisément les entrées sorties de fichier en C++ (ça commence à venir)
  - [ ] Trouver un nom pour le fichier texte dans lequel sera stocké les raccourcis
+ - [ ] Voir comment on gérera les paramètres
  - [ ] Déterminer si les options seront définies dans ce même fichier texte ou dans un fichier type settings.ini
- - [ ] Apprendre comment manipuler précisément les entrées sorties de fichier en C++
 
 ## Objectifs
 
