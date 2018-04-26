@@ -6,11 +6,9 @@ int main(int argc, char* args[])
 {
 	const std::string fileName = "test.txt"; // Nom du fichier
 
-    std::ifstream file; // Ouverture du fichier
-	file.open(fileName);
+    std::ifstream file (fileName); // Ouverture du fichier
 
-	// Test de l'ouverture du fichier
-	if (!file)
+	if (!file) // Test de l'ouverture du fichier
 	{
 		std::cout << "Une erreur est survenue lors de l'ouverture du fichier " << fileName;
 		return 1;
@@ -19,8 +17,8 @@ int main(int argc, char* args[])
 	std::cout << "Nous allons vous afficher le contenu du fichier, ligne par ligne:" << std::endl << std::endl;
 
 	std::string line = "cc";
-	for (int l = 1; file >> line; l++)
-		std::cout << "Ligne " << l << ": " << line << std::endl;
+	for (int l = 1; getline(file, line); l++) // Tant que le curseur n'atteint pas la fin du fichier
+		std::cout << "Ligne " << l << ": " << line << std::endl; // Afficher la ligne
 
 	std::cout << std::endl << "Fin de la lecture du fichier !" << std::endl;
 
@@ -30,3 +28,7 @@ int main(int argc, char* args[])
 	std::cin.get();
 	return 0;
 }
+
+// J'ai trouvé une petite aide pour la lecture/écriture dans un fichier texte
+// https://cpp.developpez.com/faq/cpp/?page=Manipulation-des-fichiers
+// Attention, les articles datent de 2007, donc avant la grosse mise à jour avec le standard C++11
