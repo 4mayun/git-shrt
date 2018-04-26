@@ -1,37 +1,44 @@
-REM REM REM REM REM REM REM REM REM REM REM REM REM REM REM
+﻿REM REM REM REM REM REM REM REM REM REM REM REM REM REM REM
 REM                                                     REM
 REM     Petit utilitaire pour compiler des petits       REM
 REM   projet en C++. Script libre. Pour une question,   REM
 REM     me contacter à: amayun.houery@e.rascol.net      REM
 REM                                                     REM
+REM      (Dernière modification: 26/04/2018 19h30)      REM
+REM                                                     REM
 REM REM REM REM REM REM REM REM REM REM REM REM REM REM REM
 
 :init
-
-REM ---------- Organisation des fichiers ---------- LES NOMS DE DOSSIER DOIVENT ÊTRE CONFORMES (il DOIT y avoir un '/' à la fin)
-REM Nom du fichier de sortie
-set out=git-shrt.exe
-REM Nom du dossier contenant les fichiers sources
-set src=src/
-REM Nom du dossier contenant l'executable compilé (répertoire de sortie) (laisser vide pour repertoire courant)
-set bin=bin/
-
 echo off
 title Fast compile + run
 color 0f
 cls
 mode con cols=96 lines=98302
+
+REM ---------- Organisation des fichiers ---------- LES NOMS DE DOSSIER DOIVENT ÊTRE CONFORMES (il DOIT y avoir un '/' à la fin)
+REM Nom du fichier de sortie
+set out=git-shrt.exe
+REM Nom du dossier contenant les fichiers sources (répertoire d'entrée) (laisser vide pour repertoire courant)
+set src=src/
+REM Nom du dossier contenant l'executable compilé (répertoire de sortie) (laisser vide pour repertoire courant)
+set bin=bin/
+
 goto search
+
 
 :search
 	set cn=0
 	echo.
 	echo Preparation des fichiers...
 	
-	IF NOT EXIST %src% (
-		echo Le dossier "%src%" suppose contenir les sources n'existe pas !
-		goto :exit
-	)
+	REM Vérification de l'existence du dossier contenant les fichiers sources
+	if defined src (goto :check_src) else (goto :not_check_src)
+	:check_src
+		IF NOT EXIST %src% (
+			echo Le dossier "%src%" suppose contenir les sources n'existe pas !
+			goto :exit
+		)
+	:not_check_src
 	
 	for %%F in (%src%*.cpp) do (
 		set /a cn+=1
@@ -50,6 +57,7 @@ goto search
 	
 	echo Preparation terminee: %cn% fichier%s% trouve%s%
 	goto :compile
+
 
 :compile
 	REM Vérification du nom de dossier et création si non existant
@@ -70,7 +78,7 @@ goto search
 	echo.
 	
 	REM ----- Compilation -----
-	g++ src/*.cpp -o %bin%%out% -Wall
+	g++ %src%*.cpp -o %bin%%out% -Wall
 	set succ=%errorlevel%
 	REM -----    -----    -----
 	
@@ -83,6 +91,7 @@ goto search
 	echo ------ Une erreur est survenue lors de la compilation...
 	goto :exit
 
+
 :exec
 	echo.
 	echo.
@@ -92,7 +101,8 @@ goto search
 	cd %bin%
 	start %out%
 	goto :eof
-	
+
+
 :exit
 	echo.
 	echo.
