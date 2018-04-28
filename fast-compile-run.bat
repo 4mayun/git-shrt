@@ -1,10 +1,10 @@
-﻿REM REM REM REM REM REM REM REM REM REM REM REM REM REM REM
+REM REM REM REM REM REM REM REM REM REM REM REM REM REM REM
 REM                                                     REM
 REM     Petit utilitaire pour compiler des petits       REM
 REM   projet en C++. Script libre. Pour une question,   REM
 REM     me contacter à: amayun.houery@e.rascol.net      REM
 REM                                                     REM
-REM      (Dernière modification: 26/04/2018 19h30)      REM
+REM      (Dernière mise à jour: 29/04/2018 01h30)       REM
 REM                                                     REM
 REM REM REM REM REM REM REM REM REM REM REM REM REM REM REM
 
@@ -13,26 +13,40 @@ echo off
 title Fast compile + run
 color 0f
 cls
-mode con cols=96 lines=98302
+mode con cols=232 lines=98302
 
-REM ---------- Organisation des fichiers ---------- LES NOMS DE DOSSIER DOIVENT ÊTRE CONFORMES (il DOIT y avoir un '/' à la fin)
-REM Nom du fichier de sortie
-set out=git-shrt.exe
+REM ---------- PARAMETRES DU COMPILATEUR (voir https://gcc.gnu.org/onlinedocs/gcc-6.4.0/gcc/Option-Summary.html#Option-Summary )
+set param=-Wall -Wextra -Wpedantic -Og
+
+REM ---------- Organisation des dossiers et fichiers ---------- LES NOMS DE DOSSIER DOIVENT ÊTRE CONFORMES (il DOIT y avoir un '/' à la fin, SAUF si il s'agit du répertoire courant)
+
 REM Nom du dossier contenant les fichiers sources (répertoire d'entrée) (laisser vide pour repertoire courant)
 set src=src/
+
+REM Nom du dossier contenant les fichiers temporaires (laisser vide pour repertoire courant)
+set obj=obj/
+
 REM Nom du dossier contenant l'executable compilé (répertoire de sortie) (laisser vide pour repertoire courant)
 set bin=bin/
+
+REM Extension des fichiers sources (peut être: .cc .cp .cxx .cpp .CPP .c++ .C )
+set ext=.cpp
+REM Nom du fichier de sortie
+set out=git-shrt.exe
 
 goto search
 
 
 :search
 	set cn=0
-	echo.
-	echo Preparation des fichiers...
+	echo. & echo.
+	echo ----------------------------------------------------------------------------------------------------
+	echo Preparation des dossiers et des fichiers...
 	
 	REM Vérification de l'existence du dossier contenant les fichiers sources
 	if defined src (goto :check_src) else (goto :not_check_src)
+	echo.
+	echo Verification de l'existence du dossier qui contient les fichiers sources (%src%)
 	:check_src
 		IF NOT EXIST %src% (
 			echo Le dossier "%src%" suppose contenir les sources n'existe pas !
@@ -40,9 +54,12 @@ goto search
 		)
 	:not_check_src
 	
-	for %%F in (%src%*.cpp) do (
+	REM Recherche et comptage des fichiers
+	echo.
+	echo Recherche et comptage des fichiers sources:
+	for /r "%cd%\%src%" %%F in (*%ext%) do (
 		set /a cn+=1
-		echo Fichier %%~nF selectionne
+		echo Fichier  %%~nF  selectionne
 	)
 	
 	IF %cn% EQU 0 (
@@ -51,18 +68,32 @@ goto search
 		goto :exit
 	) ELSE (IF %cn% EQU 1 (
 		set s=
+		set av=a
 	) ELSE (IF %cn% GTR 1 (
 		set s=s
+		set av=ont
 	)))
 	
-	echo Preparation terminee: %cn% fichier%s% trouve%s%
-	goto :compile
-
-
-:compile
-	REM Vérification du nom de dossier et création si non existant
+	echo Fin de la recherche des sources: %cn% fichier%s% %av% ete trouve%s%
+	
+	REM Verification de l'existence du dossier intermediaire et création si non existant
+	if defined obj (
+		echo.
+		echo Verification de l'existence du dossier intermediaire...
+		IF NOT EXIST %obj% (
+			echo Ce dossier n'existe pas: creation du dossier...
+			mkdir %obj:~0,-1%
+		)
+	)
+	
+	REM Verification de l'existence du dossier de sortie et création si non existant
 	if defined bin (
-		IF NOT EXIST %bin% mkdir %bin:~0,-1%
+		echo.
+		echo Verification de l'existence du dossier de sortie...
+		IF NOT EXIST %bin% (
+			echo Ce dossier n'existe pas: creation du dossier...
+			mkdir %bin:~0,-1%
+		)
 	)
 	
 	REM Vérification du nom de l'executable qui sera créé
@@ -73,23 +104,64 @@ goto search
 	)
 	
 	echo.
-	echo.
-	echo ------ Compilation en cours...
+	echo Fin de la verification des fichiers et des dossiers.
+	echo ----------------------------------------------------------------------------------------------------
 	echo.
 	
-	REM ----- Compilation -----
-	g++ %src%*.cpp -o %bin%%out% -Wall
-	set succ=%errorlevel%
-	REM -----    -----    -----
-	
+	goto :compile
+
+
+:compile
 	echo.
-	IF %succ% EQU 0 (
-		echo ------ Compilation terminee !
-		goto :exec
+	echo ----------------------------------------------------------------------------------------------------
+	echo Compilation des fichiers %ext% un par un
+	echo.
+	
+	for /R "%cd%\%src%" %%F in (*%ext%) do (
+		echo ------ Compilation du fichier %%~nxF
+		
+		REM ----- Compilation -----
+		g++ %%~fF -c -o %obj%%%~nF.o %param%
+		REM -----    -----    -----
+		
+		IF ERRORLEVEL 1 (
+			echo ------ Une erreur est survenue lors de la compilation
+			echo        Annulation de la procedure de compilation.
+			goto :exit
+		)
+		
+		IF ERRORLEVEL 0 echo ------ Compilation terminee
+		
+		echo. & REM ne pas effacer ce commentaire
 	)
-	REM else
-	echo ------ Une erreur est survenue lors de la compilation...
-	goto :exit
+	
+	echo ----------------------------------------------------------------------------------------------------
+	echo.
+	
+	goto :link
+	
+
+:link
+	echo.
+	echo ----------------------------------------------------------------------------------------------------
+	echo Linkage des fichiers objets compiles precedemment
+	echo.
+	echo ------ Linkage en cours...
+	
+	REM ------ Linkage ------
+	g++ %obj%*.o -o %bin%%out%
+	REM ------         ------
+	
+	IF %errorlevel% EQU 0 (
+		echo ------ Linkage termine !
+		echo.
+		echo Fin de la procedure de linkage.
+		echo ----------------------------------------------------------------------------------------------------
+		goto :exec
+	) else (
+		echo ------ Une erreur est survenue lors du linkage...
+		goto :exit
+	)
 
 
 :exec
